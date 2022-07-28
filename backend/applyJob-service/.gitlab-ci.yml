@@ -1,0 +1,15 @@
+image: maven:latest
+variables:
+  SONAR_TOKEN: $APPLY_JOB_SONAR_TOKEN
+  SONAR_HOST_URL: "https://sonarcloud.io"
+  GIT_DEPTH: 0
+
+sonarcloud-backend-applyJob-service:
+  stage: sonar-applyJob
+  script:
+    - cd "${CI_PROJECT_DIR}/backend/applyJob-service"
+    - mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=apply-Job -Dsonar.qualitygate.wait=true -Dsonar.coverage.exclusions=**/entity/*,**/ApplyJobServiceApplication.java,**/exception/*
+  allow_failure: true
+  only:
+    - merge_requests
+    - main

@@ -1,0 +1,14 @@
+server:
+  port: 9003
+spring:
+  application:
+    name: SKILL-SERVICE
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://3.142.147.227:8761/eureka/
+  instance:
+    hostname: 3.142.147.227

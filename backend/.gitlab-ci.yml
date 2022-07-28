@@ -1,0 +1,92 @@
+image:
+  name: amazon/aws-cli
+  entrypoint: [""]
+services:
+  - name: docker:20-dind
+    command: ["--tls=false"]
+
+variables:
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_DRIVER: overlay
+  DOCKER_TLS_CERTDIR: ""
+  SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar" # Defines the location of the analysis task cache
+  GIT_DEPTH: "0" # Tells git to fetch all the branches of the project, required by the analysis task
+
+stages:
+  - Build the backend image and Push to Docker Hub
+  - backend deploy
+
+build:
+  stage: Build the backend image and Push to Docker Hub
+  image: docker:latest
+  only:
+    - main
+    - merge_requests
+
+  before_script:
+    - docker --version
+    - echo "$CR_PAT" | docker login ghcr.io -u "$REGISTRY_USER" --password-stdin
+  script:
+    - pwd
+    - cd backend
+    - cd applyJob-service
+    - docker build . --file Dockerfile -t ghcr.io/$REGISTRY_USER/bc36_applyjob:latest
+    - docker push ghcr.io/$REGISTRY_USER/bc36_applyjob:latest
+    - cd ..
+    - cd cloud-gateway
+    - docker build . --file Dockerfile -t ghcr.io/$REGISTRY_USER/bc36_cloudgateway:latest
+    - docker push ghcr.io/$REGISTRY_USER/bc36_cloudgateway:latest
+    - cd ..
+    - cd company-service
+    - docker build . --file Dockerfile -t ghcr.io/$REGISTRY_USER/bc36_company:latest
+    - docker push ghcr.io/$REGISTRY_USER/bc36_company:latest
+    - cd ..
+    - cd job-service
+    - docker build . --file Dockerfile -t ghcr.io/$REGISTRY_USER/bc36_jobservice:latest
+    - docker push ghcr.io/$REGISTRY_USER/bc36_jobservice:latest
+    - cd ..
+    - cd location-service
+    - docker build . --file Dockerfile -t ghcr.io/$REGISTRY_USER/bc36_location:latest
+    - docker push ghcr.io/$REGISTRY_USER/bc36_location:latest
+    - cd ..
+    - cd saveJob-service
+    - docker build . --file Dockerfile -t ghcr.io/$REGISTRY_USER/bc36_savejob:latest
+    - docker push ghcr.io/$REGISTRY_USER/bc36_savejob:latest
+    - cd ..
+    - cd service-registry
+    - docker build . --file Dockerfile -t ghcr.io/$REGISTRY_USER/bc36_serviceregistry:latest
+    - docker push ghcr.io/$REGISTRY_USER/bc36_serviceregistry:latest
+    - cd ..
+    - cd skill-service
+    - docker build . --file Dockerfile -t ghcr.io/$REGISTRY_USER/bc36_skill:latest
+    - docker push ghcr.io/$REGISTRY_USER/bc36_skill:latest
+
+backend_deploy:
+  stage: backend deploy
+  image: kroniak/ssh-client
+
+  before_script:
+    - mkdir ~/.ssh
+    - echo -e "$KEY_PAIR" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+
+  script:
+    - ssh ubuntu@3.142.147.227 "sudo docker-compose stop"
+    - ssh ubuntu@3.142.147.227 "sudo docker-compose down"
+    - ssh ubuntu@3.142.147.227 "sudo systemctl stop docker"
+    - ssh ubuntu@3.142.147.227 "sudo rm -rf /var/lib/docker"
+    - ssh ubuntu@3.142.147.227 "sudo systemctl start docker"
+    - ssh ubuntu@3.142.147.227 "docker pull ghcr.io/$REGISTRY_USER/bc36_applyjob:latest"
+    - ssh ubuntu@3.142.147.227 "docker pull ghcr.io/$REGISTRY_USER/bc36_cloudgateway:latest"
+    - ssh ubuntu@3.142.147.227 "docker pull ghcr.io/$REGISTRY_USER/bc36_company:latest"
+    - ssh ubuntu@3.142.147.227 "docker pull ghcr.io/$REGISTRY_USER/bc36_jobservice:latest"
+    - ssh ubuntu@3.142.147.227 "docker pull ghcr.io/$REGISTRY_USER/bc36_location:latest"
+    - ssh ubuntu@3.142.147.227 "docker pull ghcr.io/$REGISTRY_USER/bc36_savejob:latest"
+    - ssh ubuntu@3.142.147.227 "docker pull ghcr.io/$REGISTRY_USER/bc36_serviceregistry:latest"
+    - ssh ubuntu@3.142.147.227 "docker pull ghcr.io/$REGISTRY_USER/bc36_skill:latest"
+    - ssh ubuntu@3.142.147.227 "sudo docker-compose up -d "
+    - exit
+  only:
+    - main
+    - merge_requests

@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "jsx": "react",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "typeRoots": ["declaration.d.ts", "node_modules/@types"],
+    "lib": ["dom", "esnext"],
+    "types": ["cypress"],
+    "strict": true,
+    "sourceMap": true,
+    "target": "esnext"
+  },
+  "exclude": ["node_modules"],
+  "include": [
+    "src",
+    "declaration.d.ts",
+    "src/Constants.tsx",
+    ".storybook/decorators/LandingFormsDecorator.tsx",
+    "cypress/**/*.ts"
+  ]
+}

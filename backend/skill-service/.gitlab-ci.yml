@@ -1,0 +1,15 @@
+image: maven:latest
+variables:
+  SONAR_TOKEN: $SKILL_SONAR_TOKEN
+  SONAR_HOST_URL: "https://sonarcloud.io"
+  GIT_DEPTH: 0
+
+sonarcloud-backend-skill-service:
+  stage: sonar-skill
+  script:
+    - cd "${CI_PROJECT_DIR}/backend/skill-service"
+    - mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=skill-service -Dsonar.coverage.exclusions=**/entity/*,**/SkillServiceApplication.java
+  allow_failure: true
+  only:
+    - merge_requests
+    - main

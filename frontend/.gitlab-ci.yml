@@ -1,0 +1,97 @@
+image:
+  name: amazon/aws-cli
+  entrypoint: [""]
+services:
+  - name: docker:20-dind
+    command: ["--tls=false"]
+
+variables:
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_DRIVER: overlay
+  DOCKER_TLS_CERTDIR: ""
+  SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar" # Defines the location of the analysis task cache
+  GIT_DEPTH: "0" # Tells git to fetch all the branches of the project, required by the analysis task
+
+stages:
+  - Build image and Push to Docker Hub
+  - deploy
+  - netlify
+  - sonarcloud-check-frontend
+
+docker build and push:
+  stage: Build image and Push to Docker Hub
+  image: docker:latest
+  only:
+    - main
+    - merge_requests
+
+  before_script:
+    - docker --version
+    - echo "$CR_PAT" | docker login ghcr.io -u "$REGISTRY_USER" --password-stdin
+  script:
+    - cd "${CI_PROJECT_DIR}/frontend"
+    - docker build --file fr.Dockerfile -t ghcr.io/$REGISTRY_USER/bc36_frontend:latest .
+    - docker push ghcr.io/$REGISTRY_USER/bc36_frontend:latest
+    - docker build --file db.Dockerfile -t ghcr.io/$REGISTRY_USER/bc36_mockserver:latest .
+    - docker push ghcr.io/$REGISTRY_USER/bc36_mockserver:latest
+
+deploy:
+  stage: deploy
+  image: kroniak/ssh-client
+
+  before_script:
+    - mkdir ~/.ssh
+    - echo -e "$PVT_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+
+  script:
+    - ssh ubuntu@3.14.13.106 "echo "$CR_PAT" | docker login ghcr.io -u "$REGISTRY_USER" --password-stdin"
+    - ssh ubuntu@3.14.13.106 "docker kill mockserver frontend"
+    - ssh ubuntu@3.14.13.106 "docker rm mockserver frontend"
+    - ssh ubuntu@3.14.13.106 "docker rmi ghcr.io/$REGISTRY_USER/bc36_mockserver:latest"
+    - ssh ubuntu@3.14.13.106 "docker rmi ghcr.io/$REGISTRY_USER/bc36_frontend:latest"
+    - ssh ubuntu@3.14.13.106 "sudo systemctl stop docker"
+    - ssh ubuntu@3.14.13.106 "sudo rm -rf /var/lib/docker"
+    - ssh ubuntu@3.14.13.106 "sudo systemctl start docker"
+    - ssh ubuntu@3.14.13.106 "docker pull ghcr.io/$REGISTRY_USER/bc36_mockserver:latest"
+    - ssh ubuntu@3.14.13.106 "docker pull ghcr.io/$REGISTRY_USER/bc36_frontend:latest"
+    - ssh ubuntu@3.14.13.106 "docker run -d -p 8000:8000 --name=mockserver  ghcr.io/$REGISTRY_USER/bc36_mockserver:latest"
+    - ssh ubuntu@3.14.13.106 "docker run -d -p 3000:3000 --name=frontend --link mockserver:mockserver  ghcr.io/$REGISTRY_USER/bc36_frontend:latest"
+    - exit
+  only:
+    - main
+    - merge_requests
+
+netlify:
+  stage: netlify
+  image:
+    name: sonarsource/sonar-scanner-cli:4.6
+    entrypoint: [""]
+  script:
+    - cd "${CI_PROJECT_DIR}/frontend"
+    - npm install
+    - npm run build-storybook
+    - npx netlify-cli deploy --site $NETLIFY_SITE_ID --auth $NETLIFY_AUTH_TOKEN --prod --dir=storybook-static
+  only:
+    - main
+    - merge_requests
+
+sonarcloud-check-frontend:
+  stage: sonarcloud-check-frontend
+  image:
+    name: sonarsource/sonar-scanner-cli:4.6
+    entrypoint: [""]
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - cd "${CI_PROJECT_DIR}/frontend"
+    - npm install
+    - npm test
+    - sonar-scanner
+
+  only:
+    - merge_requests
+    - main

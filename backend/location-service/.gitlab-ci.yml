@@ -1,0 +1,15 @@
+image: maven:latest
+variables:
+  SONAR_TOKEN: $LOCATION_SONAR_TOKEN
+  SONAR_HOST_URL: "https://sonarcloud.io"
+  GIT_DEPTH: 0
+
+sonarcloud-backend-location-service:
+  stage: sonar-location
+  script:
+    - cd "${CI_PROJECT_DIR}/backend/location-service"
+    - mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Location-service -Dsonar.coverage.exclusions=**/entity/*,**/LocationServiceApplication.java
+  allow_failure: true
+  only:
+    - merge_requests
+    - main

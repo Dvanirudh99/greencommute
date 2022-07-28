@@ -1,0 +1,118 @@
+{
+  "jobs": [
+    {
+      "id": 1,
+      "role": "User Interface Designer",
+      "company": "myntra",
+      "address": "Hitech City, Hyderabad-500072",
+      "history": "36 min ago",
+      "skill": "UI/UX Designer",
+      "distance": "0-10km"
+    },
+    {
+      "id": 2,
+      "role": "Visual Designer",
+      "company": "bmw",
+      "address": "Nariman Point, Mumbai-400021",
+      "history": "10 days ago",
+      "skill": "Graphic Designer",
+      "distance": "0-10km"
+    },
+    {
+      "id": 3,
+      "role": "User Experience Designer",
+      "company": "instagram",
+      "address": "Nariman Point, Mumbai-400021",
+      "history": "36 min ago",
+      "skill": "UI/UX Designer",
+      "distance": "11-20km"
+    },
+    {
+      "id": 4,
+      "role": "Photshop Editor",
+      "company": "hp",
+      "address": "Hitech City, Hyderabad-500072",
+      "history": "46 days ago",
+      "skill": "Graphic Designer",
+      "distance": "11-20km"
+    },
+    {
+      "id": 5,
+      "role": "Web UX Designer",
+      "company": "twitter",
+      "address": "Hitech City, Hyderabad-500072",
+      "history": "10 days ago",
+      "skill": "UI/UX Designer",
+      "distance": "21-30km"
+    },
+    {
+      "id": 6,
+      "role": "Graphic Illustrator",
+      "company": "ola",
+      "address": "Nariman Point, Mumbai-400021",
+      "history": "2 hours ago",
+      "skill": "Graphic Designer",
+      "distance": "21-30km"
+    },
+    {
+      "id": 7,
+      "role": "User Experience Designer",
+      "company": "uber",
+      "address": "Nariman Point, Mumbai-400021",
+      "history": "36 min ago",
+      "skill": "UI/UX Designer",
+      "distance": "31-40km"
+    },
+    {
+      "id": 8,
+      "role": "Photshop Editor",
+      "company": "rapido",
+      "address": "Hitech City, Hyderabad-500072",
+      "history": "46 days ago",
+      "skill": "Graphic Designer",
+      "distance": "31-40km"
+    }
+  ],
+  "cabs": [
+    {
+      "id": 1,
+      "title": "Ola",
+      "logo": "ola",
+      "price": "45"
+    },
+    {
+      "id": 2,
+      "title": "Uber",
+      "logo": "uber",
+      "price": "45"
+    },
+    {
+      "id": 3,
+      "title": "rapido",
+      "logo": "rapido",
+      "price": "45"
+    }
+  ],
+  "locations": [
+    {
+      "id": 1,
+      "city": "hyderabad",
+      "aqi": 894
+    },
+    {
+      "id": 2,
+      "city": "mumbai",
+      "aqi": 953
+    }
+  ],
+  "skills": [
+    {
+      "skill": "UI/UX Designer",
+      "noOfJobs": 4
+    },
+    {
+      "skill": "Graphic Designer",
+      "noOfJobs": 4
+    }
+  ]
+}

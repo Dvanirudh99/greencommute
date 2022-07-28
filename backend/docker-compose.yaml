@@ -1,0 +1,58 @@
+version: "3.1"
+
+services:
+  Service-Registry:
+    image: ghcr.io/sreenidhize/bc36_serviceregistry:latest
+    container_name: Service-Registry
+    restart: always
+    ports:
+      - 8761:8761
+
+  Skills-service:
+    image: ghcr.io/sreenidhize/bc36_skill:latest
+    container_name: Skills-microservice
+    restart: always
+    ports:
+      - 9003:9003
+
+  Location-service:
+    image: ghcr.io/sreenidhize/bc36_location:latest
+    container_name: Location-service
+    restart: always
+    ports:
+      - 9001:9001
+
+  Savejobs-service:
+    image: ghcr.io/sreenidhize/bc36_savejob:latest
+    container_name: Savejobs-service
+    restart: always
+    ports:
+      - 9006:9006
+
+  jobs-service:
+    image: ghcr.io/sreenidhize/bc36_jobservice:latest
+    container_name: jobs-service
+    restart: always
+    ports:
+      - 9004:9004
+
+  Company-service:
+    image: ghcr.io/sreenidhize/bc36_company:latest
+    container_name: Company-service
+    restart: always
+    ports:
+      - 9002:9002
+
+  Applyjob-service:
+    image: ghcr.io/sreenidhize/bc36_applyjob:latest
+    container_name: Applyjob-service
+    restart: always
+    ports:
+      - 9005:9005
+
+  Cloud-Gateway:
+    image: ghcr.io/sreenidhize/bc36_cloudgateway:latest
+    container_name: Cloud-Gateway
+    restart: always
+    ports:
+      - 9191:9191
